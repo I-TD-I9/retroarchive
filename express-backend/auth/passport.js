@@ -32,7 +32,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await userModel.getUserById(id); // Fetch from DB
-    done(null, user); // Pass the full user object
+    done(null, user);
   } catch (error) {
     done(error);
   }

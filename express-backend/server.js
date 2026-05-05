@@ -43,7 +43,6 @@ app.use('/api/archive', archiveRoutes);
 app.use('/users', userRoutes);
 app.use('/auth', require('./auth/authRoute'));
 
-// Serve built React app in production
 const clientDist = path.join(__dirname, "..", "react-frontend-client", "dist");
 app.use(express.static(clientDist));
 app.get("*", (req, res) => res.sendFile(path.join(clientDist, "index.html")));

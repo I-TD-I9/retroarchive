@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const GAMES_API_BASE_URL = import.meta.env.VITE_API_URL + '/games' || 'http://localhost:3000/games';
+const GAMES_API_BASE_URL = (import.meta.env.VITE_API_URL || window.location.origin + '/api') + '/games';
 
 class GamesService {
   searchGames(q, platform) {

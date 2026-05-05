@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const ARCHIVE_API_BASE_URL = import.meta.env.VITE_API_URL + '/archive' || 'http://localhost:3000/archive';
+const ARCHIVE_API_BASE_URL = (import.meta.env.VITE_API_URL || window.location.origin + '/api') + '/archive';
 
 class ArchiveService {
   getArchive() {
