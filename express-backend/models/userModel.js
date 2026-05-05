@@ -1,18 +1,51 @@
-"use strict";
-const pool = require("./dbConnection");
+const pool = require('./dbConnection');
+async function getAllUsers() {
+    const queryText = "SELECT * FROM users";
+    const result = await pool.query(queryText);
+    return result.rows;
+}
 
-async function getUserByEmail(email) {
-    let queryText = "SELECT * FROM users WHERE email = $1";
-    let values = [email];
+async function getOneUserById(id) {
+    const queryText = "SELECT * FROM users where id= $1";
+    const values = [id];
     const result = await pool.query(queryText, values);
     return result.rows[0];
 }
 
-async function addUser(username, email, passwordHash) {
-    let queryText = "INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username";
-    let values = [username, email, passwordHash];
+async function deleteUser(id) {
+    let queryText = "DELETE FROM users WHERE id =$1; ";
+    const values = [id];
+    const result = await pool.query(queryText, values);
+    return result.rowCount;
+}
+
+async function addUser(name, email, password) {
+    let queryText = "INSERT INTO users ( name, email, password) VALUES ($1, $2, $3) RETURNING *";
+    let values = [name, email, password];
     const result = await pool.query(queryText, values);
     return result.rows[0];
 }
 
-module.exports = { getUserByEmail, addUser };
+async function getUserById(googleId) {
+    const queryText = "SELECT * FROM users where googleid= $1";
+    const values = [googleId];
+    const result = await pool.query(queryText, values);
+    return result.rows[0];
+}
+
+async function createNewUser([googleId, displayName, firstName, lastName, email]) {
+    let queryText = "INSERT INTO users ( googleId, displayName, firstName, lastName, email) VALUES ($1, $2, $3, $4, $5) RETURNING *";
+    let values = [googleId, displayName, firstName, lastName, email];
+    const result = await pool.query(queryText, values);
+    return result.rows[0];
+}
+
+
+module.exports = {
+    getAllUsers,
+    getOneUserById,
+    deleteUser,
+    addUser,
+    getUserById,
+    createNewUser
+};

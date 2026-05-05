@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Nav from '../components/NavComponent';
-import Stars from '../components/StarsComponent';
-import RetroArchiveService from '../RetroArchiveService';
+import ArchiveService from '../ArchiveService';
 
-const Archive = () => {
+const ArchiveComponent = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
@@ -13,7 +11,7 @@ const Archive = () => {
   const [modalError, setModalError] = useState('');
 
   const loadArchive = () => {
-    RetroArchiveService.getArchive().then((res) => {
+    ArchiveService.getArchive().then((res) => {
       setItems(res.data);
       setLoading(false);
     }).catch((err) => {
@@ -32,7 +30,7 @@ const Archive = () => {
   };
 
   const saveEdit = () => {
-    RetroArchiveService.updateArchiveItem(modal.id, { rating: rating || null, notes: notes || null }).then(() => {
+    ArchiveService.updateArchiveItem(modal.id, { rating: rating || null, notes: notes || null }).then(() => {
       setModal(null);
       loadArchive();
     }).catch((err) => {
@@ -43,23 +41,17 @@ const Archive = () => {
 
   const deleteItem = (id) => {
     if (!confirm('Remove this game from your list?')) return;
-    RetroArchiveService.deleteArchiveItem(id).then(() => {
+    ArchiveService.deleteArchiveItem(id).then(() => {
       setItems(prev => prev.filter(item => item.id !== id));
     }).catch((err) => {
       console.error(err);
     });
   };
 
-  if (loading) return (
-    <>
-      <Nav />
-      <div className="loading">Loading…</div>
-    </>
-  );
+  if (loading) return <div className="loading">Loading…</div>;
 
   return (
     <>
-      <Nav />
       <div className="page">
         <h1>My List</h1>
 
@@ -74,8 +66,8 @@ const Archive = () => {
                 <img src={item.game_image || ''} alt={item.game_name}
                   onError={(e) => e.target.style.visibility = 'hidden'} loading="lazy" />
                 <div className="item-info">
-                  <div className="item-name">{item.game_name}</div>
-                  <Stars value={item.rating || 0} />
+                  <div className="item-name"><Link to={`/games/${item.game_id}`}>{item.game_name}</Link></div>
+                  <div className="item-rating">{item.rating ? `${item.rating} / 5` : 'No rating'}</div>
                   <div className="item-notes">{item.notes || 'No notes'}</div>
                   <div className="item-actions">
                     <button className="btn btn-secondary btn-sm" onClick={() => openEdit(item)}>Edit</button>
@@ -94,7 +86,14 @@ const Archive = () => {
             <h3>Edit: {modal.game_name}</h3>
             <div className="field">
               <label>Rating</label>
-              <Stars value={rating} onChange={setRating} />
+              <select value={rating} onChange={(e) => setRating(Number(e.target.value))}>
+                <option value="0">No rating</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
             </div>
             <div className="field">
               <label>Notes</label>
@@ -112,4 +111,4 @@ const Archive = () => {
   );
 };
 
-export default Archive;
+export default ArchiveComponent;

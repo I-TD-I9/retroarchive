@@ -1,10 +1,31 @@
 import { useState, useEffect } from 'react';
-import Nav from '../components/NavComponent';
-import Stars from '../components/StarsComponent';
-import RetroArchiveService from '../RetroArchiveService';
+import { Link } from 'react-router-dom';
+import GamesService from '../GamesService';
+import ArchiveService from '../ArchiveService';
 
-const Search = () => {
+const PLATFORMS = [
+  { id: '', name: 'All' },
+  { id: '49', name: 'NES' },
+  { id: '79', name: 'SNES' },
+  { id: '83', name: 'Nintendo 64' },
+  { id: '105', name: 'GameCube' },
+  { id: '26', name: 'Game Boy' },
+  { id: '43', name: 'Game Boy Color' },
+  { id: '24', name: 'Game Boy Advance' },
+  { id: '27', name: 'PlayStation' },
+  { id: '15', name: 'PlayStation 2' },
+  { id: '17', name: 'PSP' },
+  { id: '80', name: 'Xbox' },
+  { id: '167', name: 'Genesis' },
+  { id: '74', name: 'SEGA Master System' },
+  { id: '106', name: 'Dreamcast' },
+  { id: '23', name: 'Atari 2600' },
+  { id: '12', name: 'Neo Geo' }
+];
+
+const SearchComponent = () => {
   const [query, setQuery] = useState('');
+  const [platform, setPlatform] = useState('');
   const [results, setResults] = useState([]);
   const [status, setStatus] = useState('idle');
   const [archiveIds, setArchiveIds] = useState(new Set());
@@ -14,7 +35,7 @@ const Search = () => {
   const [modalError, setModalError] = useState('');
 
   useEffect(() => {
-    RetroArchiveService.getArchive().then((res) => {
+    ArchiveService.getArchive().then((res) => {
       setArchiveIds(new Set(res.data.map(item => item.game_id)));
     }).catch((err) => {
       console.error(err);
@@ -25,7 +46,7 @@ const Search = () => {
     if (!query.trim()) return;
     setStatus('loading');
     setResults([]);
-    RetroArchiveService.searchGames(query).then((res) => {
+    GamesService.searchGames(query, platform).then((res) => {
       setResults(res.data);
       setStatus(res.data.length ? 'done' : 'empty');
     }).catch((err) => {
@@ -42,7 +63,7 @@ const Search = () => {
   };
 
   const saveToArchive = () => {
-    RetroArchiveService.addToArchive({
+    ArchiveService.addToArchive({
       game_id: modal.id,
       game_name: modal.name,
       game_image: modal.image,
@@ -59,7 +80,6 @@ const Search = () => {
 
   return (
     <>
-      <Nav />
       <div className="page">
         <h1>Search Retro Games</h1>
         <div className="search-row">
@@ -69,6 +89,9 @@ const Search = () => {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && doSearch()}
           />
+          <select value={platform} onChange={(e) => setPlatform(e.target.value)}>
+            {PLATFORMS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
           <button className="btn btn-primary" onClick={doSearch}>Search</button>
         </div>
 
@@ -83,7 +106,7 @@ const Search = () => {
                 <img src={game.image || ''} alt={game.name}
                   onError={(e) => e.target.style.visibility = 'hidden'} loading="lazy" />
                 <div className="card-body">
-                  <div className="card-name">{game.name}</div>
+                  <div className="card-name"><Link to={`/games/${game.id}`}>{game.name}</Link></div>
                   <div className="card-year">{game.released ? game.released.slice(0, 4) : '—'}</div>
                   <div className="card-footer">
                     {archiveIds.has(game.id)
@@ -104,7 +127,14 @@ const Search = () => {
             <h3>Add: {modal.name}</h3>
             <div className="field">
               <label>Rating</label>
-              <Stars value={rating} onChange={setRating} />
+              <select value={rating} onChange={(e) => setRating(Number(e.target.value))}>
+                <option value="0">No rating</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
             </div>
             <div className="field">
               <label>Notes</label>
@@ -123,4 +153,4 @@ const Search = () => {
   );
 };
 
-export default Search;
+export default SearchComponent;
