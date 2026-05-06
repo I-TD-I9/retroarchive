@@ -31,8 +31,7 @@ router.get(
     failureRedirect: `${CLIENT_BASE_URL}/login?error=true`, // Redirect to login on failure
   }),
   (req, res) => {
-    // === SUCCESSFUL AUTHENTICATION ===
-    // 'req.returnTo' was saved in the session by our 'saveReturnTo' middleware
+
     const returnTo = req.session.returnTo || '/profile';
     delete req.session.returnTo; // Clean up the session
 
@@ -59,7 +58,6 @@ router.post('/logout', (req, res) => {
     if (err) {
       return res.status(500).json({ message: 'Error logging out' });
     }
-    // Destroy the session to clear the session cookie
     req.session.destroy((sessionErr) => {
       if (sessionErr) {
         return res.status(500).json({ message: 'Error destroying session' });
